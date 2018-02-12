@@ -27,19 +27,19 @@ function simpleMarkdownRule(rule, styles) {
   return {...properties, ...reactRender}
 }
 
-function simpleMarkdownRules(rules, styles) {
+const simpleMarkdownRules = (rules, styles) => {
   const markdownRules = {}
   Object.keys(rules).forEach(nodeKey => markdownRules[nodeKey] = simpleMarkdownRule(rules[nodeKey], styles))
   return markdownRules
 }
 
-function mergeStyles(baseStyles, styles) {
+const mergeStyles = (baseStyles, styles) => {
   const mergedStyles = {...styles}
   Object.keys(baseStyles).forEach(nodeKey => mergedStyles[nodeKey] = styles[nodeKey] ? [baseStyles[nodeKey], styles[nodeKey]] : baseStyles[nodeKey])
   return mergedStyles
 }
 
-function mergeRules(baseRules, rules) {
+const mergeRules = (baseRules, rules) => {
   const mergedRules = {...rules}
   Object.keys(baseRules).forEach(nodeKey => mergedRules[nodeKey] = {...baseRules[nodeKey], ...rules[nodeKey]})
   return mergedRules
@@ -51,6 +51,28 @@ const IMAGE_SIZE = "(?:\\s+=([0-9]+)x([0-9]+))?\\)\\s*"
 
 const inlineRegex = (regex) => ((source, state) => state.inline ? regex.exec(source) : null)
 const unescapeUrl = (url) => url.replace(/\\([^0-9A-Za-z\s])/g, '$1')
+
+const DefaultRules : Rules = Object.freeze(mergeRules(
+  Object.assign(
+    {},
+    ...Object.entries(DefaultRenders).map(([nodeKey, render]) => ({ [nodeKey]: { render: render } }))
+  ),
+  {
+    heading: {
+      match: SimpleMarkdown.blockRegex(/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n *)*\n/),
+    },
+    image: {
+      match: inlineRegex(new RegExp("^!\\[(" + IMAGE_LINK + ")\\]\\(" + IMAGE_HREF_AND_TITLE + IMAGE_SIZE)),
+      parse: (capture, parse, state): ImageNode => ({
+        alt: capture[1],
+        target: unescapeUrl(capture[2]),
+        title: capture[3],
+        width: capture[4] ? parseInt(capture[4]) : undefined,
+        height: capture[5] ? parseInt(capture[5]) : undefined,
+      })
+    }
+  }
+));
 
 class MarkdownView extends Component {
   props: {
@@ -65,31 +87,8 @@ class MarkdownView extends Component {
     const {
       rules = {},
       styles = {},
-      TextComponent,
       onLinkPress,
     } = this.props;
-
-    const DefaultRules : Rules = Object.freeze(mergeRules(
-      Object.assign(
-        {},
-        ...Object.entries(DefaultRenders({ Text: TextComponent })).map(([nodeKey, render]) => ({ [nodeKey]: { render: render } }))
-      ),
-      {
-        heading: {
-          match: SimpleMarkdown.blockRegex(/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n *)*\n/),
-        },
-        image: {
-          match: inlineRegex(new RegExp("^!\\[(" + IMAGE_LINK + ")\\]\\(" + IMAGE_HREF_AND_TITLE + IMAGE_SIZE)),
-          parse: (capture, parse, state): ImageNode => ({
-            alt: capture[1],
-            target: unescapeUrl(capture[2]),
-            title: capture[3],
-            width: capture[4] ? parseInt(capture[4]) : undefined,
-            height: capture[5] ? parseInt(capture[5]) : undefined,
-          })
-        }
-      }
-    ));
 
     const mergedStyles = mergeStyles(DefaultStyles, styles)
     const mergedRules = mergeRules(SimpleMarkdown.defaultRules, simpleMarkdownRules(mergeRules(DefaultRules, rules), mergedStyles))
