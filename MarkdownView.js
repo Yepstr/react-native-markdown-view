@@ -62,14 +62,17 @@ class MarkdownView extends Component {
   }
 
   render() {
-    const {rules = {}, styles = {}, TextComponent, onLinkPress} = this.props
-
-
+    const {
+      rules = {},
+      styles = {},
+      TextComponent,
+      onLinkPress,
+    } = this.props;
 
     const DefaultRules : Rules = Object.freeze(mergeRules(
       Object.assign(
         {},
-        ...Object.entries(DefaultRenders({ Text: TextComponent })).map(([nodeKey, render]) => ({[nodeKey]: {render: render}}))
+        ...Object.entries(DefaultRenders({ Text: TextComponent })).map(([nodeKey, render]) => ({ [nodeKey]: { render: render } }))
       ),
       {
         heading: {
@@ -93,13 +96,13 @@ class MarkdownView extends Component {
 
     const markdown = (Array.isArray(this.props.children) ? this.props.children.join('') : this.props.children) + '\n\n'
 
-    const ast = SimpleMarkdown.parserFor(mergedRules)(markdown, {inline: false})
+    const ast = SimpleMarkdown.parserFor(mergedRules)(markdown, { inline: false })
     const render = SimpleMarkdown.reactFor(SimpleMarkdown.ruleOutput(mergedRules, 'react'))
-    const initialRenderState = {onLinkPress: onLinkPress}
+    const initialRenderState = { onLinkPress: onLinkPress }
 
     return (
-      <View style={this.props.style}>
-        {render(ast, initialRenderState)}
+      <View style={ this.props.style }>
+        { render(ast, initialRenderState) }
       </View>
     )
   }
@@ -158,7 +161,7 @@ MarkdownView.propTypes = {
    * default style exists, they will me merged, with style properties defined here taking
    * precedence.
    */
-  styles: PropTypes.objectOf(PropTypes.object),
+  styles: PropTypes.objectOf(PropTypes.any),
 
   /**
    * Callback function for when a link is pressed. The callback receives the URL of the link as a

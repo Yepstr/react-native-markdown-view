@@ -93,11 +93,15 @@ const renderFactory = ({
   }
 
   const textContentRenderer = (styleName, styleName2) => {
-    return (node: InlineContentNode, output: OutputFunction, state: RenderState, styles: RenderStyles) => (
-      <Text key={state.key} style={styleName2 ? [styles[styleName], styles[styleName2]] : styles[styleName]}>
-        {typeof node.content === 'string' ? node.content : output(node.content, state)}
-      </Text>
-    )
+    return (node: InlineContentNode, output: OutputFunction, state: RenderState, styles: RenderStyles) => {
+      const textStyles = [styles[styleName], styles[styleName2], styles.__baseText];
+
+      return (
+        <Text key={state.key} style={ textStyles }>
+          {typeof node.content === 'string' ? node.content : output(node.content, state)}
+        </Text>
+      )
+    }
   }
 
   const paddedSize = (size, style) => {

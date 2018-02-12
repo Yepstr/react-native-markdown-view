@@ -1,4 +1,7 @@
 export default Object.freeze({
+  __baseText: {
+
+  },
   blockQuote: {
     marginLeft: 10,
     opacity: 0.8,
