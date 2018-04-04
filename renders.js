@@ -140,8 +140,8 @@ export default Object.freeze({
   inlineCode: textContentRenderer('inlineCode'),
   link: (node: LinkNode, output: OutputFunction, state: RenderState, styles: RenderStyles) => {
     const onPress = state.onLinkPress
-    return <Text key={state.key} style={styles.link} onPress={onPress ? () => onPress(node.target) : null}>
-      {typeof node.content === 'string' ? node.content : output(node.content, state)}
+    return <Text key={state.key} style={[styles.___baseText, styles.link]} onPress={onPress ? () => onPress(node.target) : null}>
+      {typeof node.content === 'string' ? node.content : node.content.map(obj => obj.content).join('')}
     </Text>
   },
   list: (node: ListNode, output: OutputFunction, state: RenderState, styles: RenderStyles) => (
